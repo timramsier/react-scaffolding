@@ -1,4 +1,10 @@
 const path = require('path')
+const ExtractTextPlugin = require('extract-text-webpack-plugin')
+
+const extractLess = new ExtractTextPlugin({
+  filename: '[name].[contenthash].css',
+  disable: process.env.NODE_ENV === 'development'
+})
 
 module.exports = {
   context: __dirname,
@@ -10,7 +16,8 @@ module.exports = {
   },
   devServer: {
     publicPath: '/public/',
-    historyApiFallback: true
+    historyApiFallback: true,
+    port: 8080
   },
   resolve: {
     extensions: ['.js', '.json']
@@ -48,7 +55,26 @@ module.exports = {
             }
           }
         ]
+      },
+      {
+        test: /\.less$/,
+        use: extractLess.extract({
+          use: [{
+            loader: 'css-loader'
+          }, {
+            loader: 'less-loader'
+          }],
+                // use style-loader in development
+          fallback: 'style-loader'
+        })
       }
     ]
-  }
+  },
+  plugins: [
+    new ExtractTextPlugin('style.css')
+  // if you want to pass in options, you can do so:
+  // new ExtractTextPlugin({
+  //  filename: 'style.css'
+  // })
+  ]
 }
